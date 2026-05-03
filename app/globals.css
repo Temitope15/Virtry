@@ -1,0 +1,51 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --background: #faf8f4;
+  --foreground: #0f172a;
+}
+
+html,
+body {
+  background: var(--background);
+  color: var(--foreground);
+  -webkit-tap-highlight-color: transparent;
+}
+
+body {
+  background-image:
+    radial-gradient(1100px 500px at 90% -10%, rgba(220, 38, 38, 0.08), transparent 60%),
+    radial-gradient(900px 500px at -10% 110%, rgba(30, 39, 72, 0.06), transparent 60%);
+  min-height: 100dvh;
+}
+
+/* Hide native file input but keep accessible */
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  border: 0;
+}
+
+.canvas-wrapper canvas {
+  border-radius: 0.75rem;
+}
+
+/* Subtle checker pattern for the canvas backdrop so transparent merch
+   reads clearly even before the user uploads a photo. */
+.canvas-checker {
+  background-color: #f3f4f6;
+  background-image:
+    linear-gradient(45deg, #e5e7eb 25%, transparent 25%),
+    linear-gradient(-45deg, #e5e7eb 25%, transparent 25%),
+    linear-gradient(45deg, transparent 75%, #e5e7eb 75%),
+    linear-gradient(-45deg, transparent 75%, #e5e7eb 75%);
+  background-size: 18px 18px;
+  background-position: 0 0, 0 9px, 9px -9px, -9px 0;
+}
