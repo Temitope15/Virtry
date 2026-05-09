@@ -10,8 +10,8 @@
     "upload-merch": "node scripts/upload-merch.mjs"
   },
   "dependencies": {
+    "@google/genai": "^1.51.0",
     "cloudinary": "^2.5.0",
-    "fabric": "^6.4.3",
     "lucide-react": "^0.400.0",
     "next": "14.2.5",
     "react": "^18.3.1",

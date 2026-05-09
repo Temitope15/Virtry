@@ -1,37 +1,41 @@
 "use client";
 
-import { useRef, useState, type MutableRefObject } from "react";
+import { useCallback, useRef, useState, type MutableRefObject } from "react";
 import { Header } from "@/components/Header";
 import { MerchCatalog } from "@/components/MerchCatalog";
 import { Uploader } from "@/components/Uploader";
 import {
-  CanvasWorkspace,
-  type CanvasWorkspaceHandle,
-} from "@/components/CanvasWorkspace";
+  TryOnViewer,
+  type TryOnViewerHandle,
+} from "@/components/TryOnViewer";
 import type { MerchItem } from "@/lib/types";
 
 export default function Home() {
   const [photoDataUrl, setPhotoDataUrl] = useState<string | null>(null);
-  const [activeIds, setActiveIds] = useState<ReadonlySet<string>>(new Set());
-  const canvasRef = useRef<CanvasWorkspaceHandle | null>(null);
+  const [activeMerchId, setActiveMerchId] = useState<string | null>(null);
+  const viewerRef = useRef<TryOnViewerHandle | null>(null);
 
-  function handleSelectMerch(item: MerchItem) {
-    canvasRef.current?.addOverlay(item);
-  }
+  const handleSelectMerch = useCallback((item: MerchItem) => {
+    void viewerRef.current?.generate(item);
+  }, []);
+
+  const activeIds = activeMerchId ? new Set([activeMerchId]) : EMPTY_SET;
 
   return (
     <div className="flex min-h-dvh flex-col">
       <Header />
 
       <main className="mx-auto flex w-full max-w-6xl flex-1 flex-col gap-6 px-4 py-6 sm:px-6">
-        {!photoDataUrl ? <Landing onPhoto={setPhotoDataUrl} /> : (
+        {!photoDataUrl ? (
+          <Landing onPhoto={setPhotoDataUrl} />
+        ) : (
           <Studio
             photoDataUrl={photoDataUrl}
             activeIds={activeIds}
             onPhoto={setPhotoDataUrl}
-            onActiveItemsChange={setActiveIds}
+            onActiveMerchChange={setActiveMerchId}
             onSelectMerch={handleSelectMerch}
-            canvasRef={canvasRef}
+            viewerRef={viewerRef}
           />
         )}
       </main>
@@ -43,16 +47,17 @@ export default function Home() {
   );
 }
 
+const EMPTY_SET: ReadonlySet<string> = new Set();
+
 function Landing({ onPhoto }: { onPhoto: (dataUrl: string) => void }) {
   return (
     <section className="flex flex-1 flex-col items-center justify-center gap-8 py-6 sm:py-10">
       <div className="text-center">
-
         <h2 className="mt-4 text-3xl font-bold leading-tight text-brand-ink sm:text-4xl">
           See yourself in the <span className="text-brand-red">Youth Week</span> merch
         </h2>
         <p className="mx-auto mt-3 max-w-md text-base text-brand-smoke">
-          Virtry lets you upload a photo, try on the official tees, hoodies and caps, and share your look — all in your browser.
+          Virtry lets you upload a photo and try on the official tees, hoodies and caps with AI — all in your browser.
         </p>
       </div>
 
@@ -66,7 +71,7 @@ function Landing({ onPhoto }: { onPhoto: (dataUrl: string) => void }) {
 function StepRibbon() {
   const steps = [
     { n: 1, title: "Upload", body: "A clear photo of you facing the camera." },
-    { n: 2, title: "Try on", body: "Tap a piece of merch to see it on you." },
+    { n: 2, title: "Try on", body: "Tap a piece of merch — AI fits it on you." },
     { n: 3, title: "Share", body: "Download and post it to your story." },
   ];
   return (
@@ -91,18 +96,18 @@ interface StudioProps {
   photoDataUrl: string;
   activeIds: ReadonlySet<string>;
   onPhoto: (dataUrl: string) => void;
-  onActiveItemsChange: (ids: ReadonlySet<string>) => void;
+  onActiveMerchChange: (id: string | null) => void;
   onSelectMerch: (item: MerchItem) => void;
-  canvasRef: MutableRefObject<CanvasWorkspaceHandle | null>;
+  viewerRef: MutableRefObject<TryOnViewerHandle | null>;
 }
 
 function Studio({
   photoDataUrl,
   activeIds,
   onPhoto,
-  onActiveItemsChange,
+  onActiveMerchChange,
   onSelectMerch,
-  canvasRef,
+  viewerRef,
 }: StudioProps) {
   return (
     <section className="flex flex-1 flex-col gap-4">
@@ -112,7 +117,7 @@ function Studio({
             Style your look
           </h2>
           <p className="text-sm text-brand-smoke">
-            Tap items on the right · drag, scale, rotate to fit · download when you're done
+            Tap any item — Gemini will render it on you · download when you're done
           </p>
         </div>
         <Uploader hasPhoto onPhotoSelected={onPhoto} />
@@ -120,10 +125,10 @@ function Studio({
 
       <div className="grid flex-1 gap-4 lg:grid-cols-[1fr_340px]">
         <div className="order-2 lg:order-1">
-          <CanvasWorkspace
-            ref={canvasRef}
+          <TryOnViewer
+            ref={viewerRef}
             photoDataUrl={photoDataUrl}
-            onActiveItemsChange={onActiveItemsChange}
+            onActiveMerchChange={onActiveMerchChange}
           />
         </div>
         <div className="order-1 max-h-[44vh] rounded-2xl border border-brand-line bg-white p-4 shadow-card lg:order-2 lg:max-h-none">
